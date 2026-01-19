@@ -1,0 +1,17 @@
+{
+  "Group": "armelin1",
+  "Name": "Keep Inventory Fixed",
+  "Version": "1.0.0",
+  "Description": "Keep your entire inventory on death without break your game.",
+  "Authors": [
+    {
+      "Name": "armelin1"
+    }
+  ],
+  "ServerVersion": "*",
+  "Main": "one.armelin.keepinventoryfixed.KeepInventoryFixed",
+  "Dependencies": {},
+  "OptionalDependencies": {},
+  "DisabledByDefault": false,
+  "IncludesAssetPack": true
+}
