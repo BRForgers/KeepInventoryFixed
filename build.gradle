@@ -1,3 +1,12 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.vineflower:vineflower:1.11.2'
+    }
+}
+
 plugins {
     id 'java'
     id 'org.jetbrains.gradle.plugin.idea-ext' version '1.3'
@@ -6,7 +15,50 @@ plugins {
 }
 
 group = 'one.armelin'
-version = '1.0.0'
+version = '1.0.1'
+
+def decomp(fileCollection) {
+    def jarFile = fileCollection.singleFile
+
+    if (jarFile.name.endsWith('.jar') && jarFile.exists()) {
+        def decompiled = new File(jarFile.parentFile, jarFile.name.replace('.jar', '-sources.jar'))
+
+        if (!decompiled.exists()) {
+            println "Decompiling ${jarFile.name}..."
+
+            def vineflowerJar = buildscript.configurations.classpath.find { it.name.contains('vineflower') }
+
+            println "Vineflower JAR: ${vineflowerJar}"
+            println "Input: ${jarFile.absolutePath}"
+            println "Output: ${decompiled.absolutePath}"
+
+            def process = new ProcessBuilder(
+                    'java',
+                    '-Xmx10G',
+                    '-cp',
+                    vineflowerJar.absolutePath,
+                    'org.jetbrains.java.decompiler.main.decompiler.ConsoleDecompiler',
+                    jarFile.absolutePath,
+                    decompiled.absolutePath
+            )
+            process.redirectErrorStream(true)
+
+            def proc = process.start()
+
+            proc.inputStream.eachLine { line ->
+                println "  [Vineflower] ${line}"
+            }
+
+            def exitCode = proc.waitFor()
+            println "Exit code: ${exitCode}"
+            println "Decompiled JAR exists: ${decompiled.exists()}"
+        }
+
+        return files(jarFile)
+    }
+
+    return fileCollection
+}
 
 java {
     sourceCompatibility = JavaVersion.VERSION_25
@@ -18,7 +70,7 @@ repositories {
 }
 
 dependencies {
-    implementation(files("${project.HytaleInstallDir}/install/release/package/game/latest/Server/HytaleServer.jar"))
+    implementation decomp(files("${project.HytaleInstallDir}/install/release/package/game/latest/Server/HytaleServer.jar"))
 }
 
 def serverRunDir = file("$projectDir/run/server")
@@ -37,6 +89,7 @@ idea.project.settings.runConfigurations {
         if (load_user_mods.toBoolean()) {
             programParameters += " --mods=${project.HytaleInstallDir}/UserData/Mods"
         }
-        workingDirectory = serverRunDir.absolutePath
+        //workingDirectory = serverRunDir.absolutePath
+        workingDirectory = file("${project.ServerDir}").absolutePath
     }
 }
