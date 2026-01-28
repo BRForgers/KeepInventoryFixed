@@ -1,7 +1,7 @@
 {
   "Group": "armelin1",
   "Name": "Keep Inventory Fixed",
-  "Version": "1.0.0",
+  "Version": "1.0.2",
   "Description": "Keep your entire inventory on death without break your game.",
   "Authors": [
     {
